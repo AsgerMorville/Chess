@@ -14,15 +14,17 @@ class Board:
         self.castling = True
         self.turn = "W"
         self.piece_list = self.init()
-        self.pseudo_legal_moves = self.pseudo_legal_moves()
+        self.pseudo_legal_moves = self.pseudo_legal_moves_f()
         self.real_legal_moves = self.real_legal_moves()
         
     def real_legal_moves(self):
         pass
-    def pseudo_legal_moves(self):
+    def pseudo_legal_moves_f(self):
         moves = []
         for p in self.piece_list[self.turn_index(self.turn)]:
-            moves.append(self.piece_moves(p))
+            p_moves = self.piece_moves(p)
+            if len(p_moves) > 0:
+                moves.extend(self.piece_moves(p))
         return(moves)
     
     def piece_moves(self,piece):
@@ -65,41 +67,46 @@ class Board:
     def pawn_moves(self,pos):
         #Convert position
         curr = self.pos_converter(pos)
+        #print("pos:")
+        #print(pos)
+        #print("curr:")
+        #print(curr)
+        
         legals = []
         
         oneupped = self.oneUp(curr)
         if self.pieces[oneupped] == 0:
-            legals.append(oneupped)
+            legals.append([curr,oneupped])
             
         twoupped = self.twoUp(curr)
         if self.pieces[twoupped] == 0 and curr[0] == 8:
-            legals.append(twoupped)
+            legals.append([curr,twoupped])
             
         upright = self.oneUp(self.right(curr))
         if -10 < self.pieces[upright] < 0:
-            legals.append(upright)
+            legals.append([curr,upright])
             
         upleft = self.oneUp(self.left(curr))
         if -10 < self.pieces[upleft] < 0:
-            legals.append(upleft)
+            legals.append([curr,upleft])
             
-        return legals
+        return(legals)
     
     @staticmethod
     def knight_moves(pos):
-        pass
+        return([])
     @staticmethod
     def bishop_moves(pos):
-        pass
+        return([])
     @staticmethod
     def rook_moves(pos):
-        pass
+        return([])
     @staticmethod
     def queen_moves(pos):
-        pass
+        return([])
     @staticmethod
     def king_moves(pos):
-        pass
+        return([])
     @staticmethod
     def oneUp(tup):
         return(tup[0]-1,tup[1])
@@ -120,30 +127,40 @@ class Board:
             return 1
         return 0
     def update_pos(self,move):
-        desired = self.pos_converter(move.desired())
-        current = self.pos_converter(move.current())
+        desired = self.pos_converter(move.desired_pos())
+        current = self.pos_converter(move.current_pos())
         self.pieces[desired] = self.pieces[current]
         self.pieces[current] = 0
         for p in self.piece_list[self.turn_index(self.turn)]:
-            if p.position == move.desired():
+            if p.position == move.desired_pos():
                 p = 0
-            if p.position == move.current():
-                p.position = move.desired()
-        return
+            if p.position == move.current_pos():
+                p.position = move.desired_pos()
+        return None
+    
+    def flip_board(self):
+        self.pieces = (-1)*self.pieces
+        self.pieces = np.flip(self.pieces)
         
-        
+    def move_to_list(self,move):
+        out=[self.pos_converter(move.current_pos()),self.pos_converter(move.desired_pos())]
+        return(out)
         
     def push(self,move):
         #move is a move object.
+        
         if self.turn == "B":
             self.flip_board()
-            move = self.flip_move(move)
+            move.flip()
+        print(move)
+        move_list = self.move_to_list(move)
         #Check1: is this in the set of pseudo-legal moves? Fast-check.
-        self.pseudo_legal_moves()
-        if move in self.pseudo_legal_moves:
+        self.pseudo_legal_moves = self.pseudo_legal_moves_f()
+        print(self.pseudo_legal_moves)
+        if move_list in self.pseudo_legal_moves:
             print("ue")
             if self.turn == "B":
-                move = self.flip_move(move)
+                move.flip()
                 self.flip_board()
             self.update_pos(move)
             return
@@ -243,7 +260,7 @@ class Board:
                      Piece("c8","bishop"),Piece("d8","queen"),
                      Piece("e8","king"),Piece("f8","bishop"),
                      Piece("g8","knight"),Piece("h8","rook")]
-        return([xwhite,xblack])
+        return([xblack,xwhite])
 
     def array_initializer(self):
         return(np.pad( np.array([[-4, -2, -3, -5, -6, -3, -2, -4],

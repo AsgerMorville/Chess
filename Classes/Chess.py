@@ -45,7 +45,7 @@ class Chess:
             self.board.turn = "B"
         elif self.board.turn == "B":
             self.board.turn = "W"
-        return
+        return None
     
     def possibleMoves():
         pass

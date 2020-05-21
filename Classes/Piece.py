@@ -10,6 +10,25 @@ class Piece:
         self.position = position
         self.type_piece = type_piece
     
+    def flip_piece(self):
+        diction={'a' : 'h',
+                 'b' : 'g',
+                 'c' : 'f',
+                 'd' : 'e',
+                 'e' : 'd',
+                 'f' : 'c',
+                 'g' : 'b',
+                 'h' : 'a',
+                 '1' : '8',
+                 '2' : '7',
+                 '3' : '6',
+                 '4' : '5',
+                 '5' : '4',
+                 '6' : '3',
+                 '7' : '2',
+                 '8' : '1'}
+        self.position = diction[self.position[1]]+ diction[self.position[0]]
+        return None
 
 
 
@@ -17,21 +36,6 @@ class Piece:
      
 
 
-
-piece1 = Piece("a3","rook")
-piece2 = Piece("b3","rook")
-piece3 = Piece("a4","knight")
-piece4 = Piece("a5","rook")
-piece5 = Piece("a6","rook")
-piece6 = Piece("a7","rook") 
-
-x2 = [[piece1,piece2],[piece3,piece4]]
-
-#2dlist = [[piece1,piece2,piece3],[piece4,piece5,piece6]]
-#x = [["a" for item in range(0,5)],["a" for item in range(0,5)]]
-for p in x2[1]:
-    if p.position == "a4":
-        print(p.type_piece)
 
 
 #print(piece1.position)

@@ -19,10 +19,33 @@ class Move:
         else: 
             raise ValueError('Move is of illegal type. Should be either string or list')
             
-    def curr(self):
+    def current_pos(self):
         return(self.curr)
-    def desired(self):
+    def desired_pos(self):
         return(self.desired)
+    def flip(self):
+        diction={'a' : 'h',
+                 'b' : 'g',
+                 'c' : 'f',
+                 'd' : 'e',
+                 'e' : 'd',
+                 'f' : 'c',
+                 'g' : 'b',
+                 'h' : 'a',
+                 '1' : '8',
+                 '2' : '7',
+                 '3' : '6',
+                 '4' : '5',
+                 '5' : '4',
+                 '6' : '3',
+                 '7' : '2',
+                 '8' : '1'}
+        self.curr = diction[self.curr[0]] + diction[self.curr[1]]
+        self.desired = diction[self.desired[0]] + diction[self.desired[1]]
+        return 2
+        
+        
+        
     
 def string_to_move(string):
         moves = []
