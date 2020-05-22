@@ -27,7 +27,7 @@ class Piece:
                  '6' : '3',
                  '7' : '2',
                  '8' : '1'}
-        self.position = diction[self.position[1]]+ diction[self.position[0]]
+        self.position = diction[self.position[0]]+ diction[self.position[1]]
         return None
 
 

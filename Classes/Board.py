@@ -152,8 +152,15 @@ class Board:
         if self.turn == "B":
             self.flip_board()
             move.flip()
-        print(move)
+            for subl in self.piece_list:
+                for p in subl:
+                    p.flip_piece()
+        #print(move.desired_pos())
         move_list = self.move_to_list(move)
+        #print(move_list)
+        #print(self.turn)
+        #for p in self.piece_list[0]:
+        #    print(p.position)
         #Check1: is this in the set of pseudo-legal moves? Fast-check.
         self.pseudo_legal_moves = self.pseudo_legal_moves_f()
         print(self.pseudo_legal_moves)
@@ -162,6 +169,9 @@ class Board:
             if self.turn == "B":
                 move.flip()
                 self.flip_board()
+                for subl in self.piece_list:
+                    for p in subl:
+                        p.flip_piece()
             self.update_pos(move)
             return
         raise Exception("Move is not legal.")
@@ -255,7 +265,7 @@ class Board:
         xblack =   [Piece("a7","pawn"),Piece("b7","pawn"),
                      Piece("c7","pawn"),Piece("d7","pawn"),
                      Piece("e7","pawn"),Piece("f7","pawn"),
-                     Piece("g7","pawn"),Piece("h8","pawn"),
+                     Piece("g7","pawn"),Piece("h7","pawn"),
                      Piece("a8","rook"),Piece("b8","knight"),
                      Piece("c8","bishop"),Piece("d8","queen"),
                      Piece("e8","king"),Piece("f8","bishop"),
