@@ -67,11 +67,6 @@ class Board:
     def pawn_moves(self,pos):
         #Convert position
         curr = self.pos_converter(pos)
-        #print("pos:")
-        #print(pos)
-        #print("curr:")
-        #print(curr)
-        
         legals = []
         
         oneupped = self.oneUp(curr)
@@ -92,21 +87,55 @@ class Board:
             
         return(legals)
     
-    @staticmethod
-    def knight_moves(pos):
-        return([])
-    @staticmethod
-    def bishop_moves(pos):
-        return([])
-    @staticmethod
-    def rook_moves(pos):
-        return([])
-    @staticmethod
-    def queen_moves(pos):
-        return([])
-    @staticmethod
-    def king_moves(pos):
-        return([])
+    def knight_moves(self,pos):
+        curr = self.pos_converter(pos)
+        legals = []
+        listofPos = [(curr[0]+1,curr[1]+2),
+                 (curr[0]+1,curr[1]-2),
+                 (curr[0]-1,curr[1]+2),
+                 (curr[0]-1,curr[1]-2),
+                 (curr[0]+2,curr[1]+1),
+                 (curr[0]+2,curr[1]-1),
+                 (curr[0]-2,curr[1]+1),
+                 (curr[0]-2,curr[1]-1)]
+        for i in listofPos:
+            if -10 < self.pieces[i] < 1:
+                legals.append([curr,i])
+        return legals
+    
+    def bishop_moves(self,pos):
+        curr = self.pos_converter(pos)
+        possibles = []
+        possibles += self.helper(curr,self.NE)+self.helper(curr,self.NW)
+        possibles += self.helper(curr,self.SW)+self.helper(curr,self.SW) 
+        print(possibles)
+        return([[curr,i] for i in possibles])
+    
+    def rook_moves(self,pos):
+        curr = self.pos_converter(pos)
+        possibles = []
+        possibles += self.helper(curr,self.down)+self.helper(curr,self.oneUp)
+        possibles += self.helper(curr,self.right)+self.helper(curr,self.left) 
+        print(possibles)
+        return([[curr,i] for i in possibles])
+
+    def queen_moves(self,pos):
+        curr = self.pos_converter(pos)
+        possibles = []
+        possibles += self.helper(curr,self.down)+self.helper(curr,self.oneUp)
+        possibles += self.helper(curr,self.right)+self.helper(curr,self.left)
+        possibles += self.helper(curr,self.NE)+self.helper(curr,self.NW)
+        possibles += self.helper(curr,self.SE)+self.helper(curr,self.SW) 
+        print(possibles)
+        return([[curr,i] for i in possibles])
+    
+    def king_moves(self,pos):
+        curr = self.pos_converter(pos)
+        one = [-1,0,1]
+        two = [-1,0,1]
+        possibles = [(curr[0]+o,curr[1]+t) for o in one for t in two \
+                     if -10 < self.pieces[(curr[0]+o,curr[1]+t)] < 1]
+        return([[curr,i] for i in possibles])
     @staticmethod
     def oneUp(tup):
         return(tup[0]-1,tup[1])
@@ -121,6 +150,16 @@ class Board:
     @staticmethod
     def down(tup):
         return(tup[0]+1,tup[1])
+
+    def NE(self,tup):
+        return(self.oneUp(self.right(tup)))
+    def NW(self,tup):
+        return(self.oneUp(self.left(tup)))
+    def SE(self,tup):
+        return(self.down(self.right(tup)))
+    def SW(self,tup):
+        return(self.down(self.left(tup)))
+
     @staticmethod
     def turn_index(turnstring):
         if turnstring == "W":
@@ -132,10 +171,11 @@ class Board:
         self.pieces[desired] = self.pieces[current]
         self.pieces[current] = 0
         for p in self.piece_list[self.turn_index(self.turn)]:
-            if p.position == move.desired_pos():
-                p = 0
-            if p.position == move.current_pos():
-                p.position = move.desired_pos()
+            if isinstance(p,Piece):
+                if p.position == move.desired_pos():
+                    p = 0
+                if p.position == move.current_pos():
+                    p.position = move.desired_pos()
         return None
     
     def flip_board(self):
@@ -177,11 +217,16 @@ class Board:
         raise Exception("Move is not legal.")
         return
     
-    def helper(self,startpos,direction,result):
-        if self.pieces[direction(startpos)] != 0:
-            return(result)
+    def helper(self,pos,direct):
+        #This function returns list of possible squares in some direction.
+        #Direct is a function: tuple -> tuple
+        target = direct(pos)
+        if -10 < self.pieces[target] < 0:
+            return([target])
+        elif self.pieces[target] == 0:
+            return([target]+self.helper(target,direct))
         else:
-            return(self.helper(self,direction(startpos),direction,result.append(direction(startpos))))
+            return([])
 
     
     
