@@ -6,6 +6,8 @@ Created on Tue May 19 12:00:59 2020
 """
 import numpy as np
 from .Piece import Piece
+import copy
+from .Move import Move
 
 
 class Board:
@@ -15,10 +17,72 @@ class Board:
         self.turn = "W"
         self.piece_list = self.init()
         self.pseudo_legal_moves = self.pseudo_legal_moves_f()
-        self.real_legal_moves = self.real_legal_moves()
+        self.real_legal_moves = self.real_legal_moves_f()
+        self.not_over = True
         
-    def real_legal_moves(self):
-        pass
+        
+    def check_move(self,move,king_pos):
+        #We know the move is pseudolegal
+        #Should return either true or false
+        diction1 = {
+        'a' : 2,
+        'b' : 3,
+        'c' : 4,
+        'd' : 5,
+        'e' : 6,
+        'f' : 7,
+        'g' : 8,
+        'h' : 9
+        }
+        diction2 = {
+              '1' : 9,
+        '2' : 8,
+        '3' : 7,
+        '4' : 6,
+        '5' : 5,
+        '6' : 4,
+        '7' : 3,
+        '8' : 2
+            }
+        inv_map1 = {v: k for k, v in diction1.items()}
+        inv_map2 = {v: k for k, v in diction2.items()}
+        
+        board_copy = copy.deepcopy(self)
+        #convert_move
+        move1 = [(inv_map1[i[1]],inv_map2[i[0]]) for i in move]
+        move_obj = Move(move1)
+        print(move_obj.desired_pos())
+        board_copy.update_pos(move_obj)
+        board_copy.switch_turn()
+        board_copy.flip_board()
+        for subl in board_copy.piece_list:
+            for p in subl:
+                p.flip_piece()
+        #board_copy.display_board()
+        king_pos[0].flip_piece()
+        new_pseudos = [i[1] for i in board_copy.pseudo_legal_moves_f()]
+        #print(king_pos)
+        king_poss = self.pos_converter(king_pos[0].get_pos())
+        print("Kingpos1:")
+        print(king_poss)
+        print("New pseudo:")
+        print(new_pseudos)
+        if king_poss in new_pseudos:
+            return(False)
+        return(True)
+    def not_over_check(self):
+        return(self.not_over)
+    def king_pos(self):
+        #Should return the square with the kings position of curr turn
+        
+        king_pos = [piece for piece in self.piece_list[self.turn_index(self.turn)] if piece.type_piece == "king"]
+        return(king_pos)        
+    
+    def real_legal_moves_f(self):    
+        king_pos = self.king_pos()
+        real_legals = [move for move in self.pseudo_legal_moves if self.check_move(move,king_pos)]
+        return(real_legals)
+        
     def pseudo_legal_moves_f(self):
         moves = []
         for p in self.piece_list[self.turn_index(self.turn)]:
@@ -63,7 +127,12 @@ class Board:
         '8' : 2
         }
         return((diction[pos[1]],diction[pos[0]]))
-        
+    def switch_turn(self):
+        diction = {"W" : "B",
+                   "B" : "W"}
+        self.turn = diction[self.turn]
+        return None
+    
     def pawn_moves(self,pos):
         #Convert position
         curr = self.pos_converter(pos)
@@ -107,8 +176,7 @@ class Board:
         curr = self.pos_converter(pos)
         possibles = []
         possibles += self.helper(curr,self.NE)+self.helper(curr,self.NW)
-        possibles += self.helper(curr,self.SW)+self.helper(curr,self.SW) 
-        print(possibles)
+        possibles += self.helper(curr,self.SE)+self.helper(curr,self.SW) 
         return([[curr,i] for i in possibles])
     
     def rook_moves(self,pos):
@@ -116,7 +184,6 @@ class Board:
         possibles = []
         possibles += self.helper(curr,self.down)+self.helper(curr,self.oneUp)
         possibles += self.helper(curr,self.right)+self.helper(curr,self.left) 
-        print(possibles)
         return([[curr,i] for i in possibles])
 
     def queen_moves(self,pos):
@@ -126,7 +193,6 @@ class Board:
         possibles += self.helper(curr,self.right)+self.helper(curr,self.left)
         possibles += self.helper(curr,self.NE)+self.helper(curr,self.NW)
         possibles += self.helper(curr,self.SE)+self.helper(curr,self.SW) 
-        print(possibles)
         return([[curr,i] for i in possibles])
     
     def king_moves(self,pos):
@@ -188,7 +254,7 @@ class Board:
         
     def push(self,move):
         #move is a move object.
-        
+        print(self.king_pos())
         if self.turn == "B":
             self.flip_board()
             move.flip()
@@ -203,8 +269,15 @@ class Board:
         #    print(p.position)
         #Check1: is this in the set of pseudo-legal moves? Fast-check.
         self.pseudo_legal_moves = self.pseudo_legal_moves_f()
+        real_legal_moves = self.real_legal_moves_f()
+        #print([i for i in self.pseudo_legal_moves if i not in real_legal_moves])
+        print("Pseudo legal moves:")
         print(self.pseudo_legal_moves)
-        if move_list in self.pseudo_legal_moves:
+        print("Real legal moves:")
+        print(real_legal_moves)
+        print("Desired move")
+        print(move_list)
+        if move_list in real_legal_moves:
             print("ue")
             if self.turn == "B":
                 move.flip()
@@ -213,7 +286,7 @@ class Board:
                     for p in subl:
                         p.flip_piece()
             self.update_pos(move)
-            return
+            return None
         raise Exception("Move is not legal.")
         return
     

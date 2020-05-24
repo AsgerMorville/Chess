@@ -53,7 +53,7 @@ class Chess:
     def play_game(self):
         print("Welcome to Chess. You will start as white.")
         self.board = Board()
-        while self.board.not_over():
+        while self.board.not_over_check():
             self.board.display_board()
             self.handle_turn()
             self.switch_turn()

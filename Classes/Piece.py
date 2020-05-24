@@ -29,7 +29,9 @@ class Piece:
                  '8' : '1'}
         self.position = diction[self.position[0]]+ diction[self.position[1]]
         return None
-
+    
+    def get_pos(self):
+        return(self.position)
 
 
      
