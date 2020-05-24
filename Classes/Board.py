@@ -21,7 +21,7 @@ class Board:
         self.not_over = True
         
         
-    def check_move(self,move,king_pos):
+    def check_move(self,move):
         #We know the move is pseudolegal
         #Should return either true or false
         diction1 = {
@@ -58,29 +58,33 @@ class Board:
         for subl in board_copy.piece_list:
             for p in subl:
                 p.flip_piece()
-        #board_copy.display_board()
-        king_pos[0].flip_piece()
+        #Now we get the possible pseudo legal moves
         new_pseudos = [i[1] for i in board_copy.pseudo_legal_moves_f()]
-        #print(king_pos)
-        king_poss = self.pos_converter(king_pos[0].get_pos())
+        
+        #Now we check if the king of the opposite side can be attacked.
+        kingsq = board_copy.enemy_king_square()
+        #board_copy.display_board()
+        
+        
+        enemy_king = self.pos_converter(kingsq[0].get_pos())
+        
         print("Kingpos1:")
-        print(king_poss)
+        print(enemy_king)
         print("New pseudo:")
         print(new_pseudos)
-        if king_poss in new_pseudos:
+        
+        if enemy_king in new_pseudos:
             return(False)
         return(True)
     def not_over_check(self):
         return(self.not_over)
-    def king_pos(self):
+    def enemy_king_square(self):
         #Should return the square with the kings position of curr turn
-        
-        king_pos = [piece for piece in self.piece_list[self.turn_index(self.turn)] if piece.type_piece == "king"]
+        king_pos = [piece for piece in self.piece_list[1-self.turn_index(self.turn)] if piece.type_piece == "king"]
         return(king_pos)        
     
     def real_legal_moves_f(self):    
-        king_pos = self.king_pos()
-        real_legals = [move for move in self.pseudo_legal_moves if self.check_move(move,king_pos)]
+        real_legals = [move for move in self.pseudo_legal_moves if self.check_move(move)]
         return(real_legals)
         
     def pseudo_legal_moves_f(self):
@@ -254,7 +258,7 @@ class Board:
         
     def push(self,move):
         #move is a move object.
-        print(self.king_pos())
+        #print(self.king_pos())
         if self.turn == "B":
             self.flip_board()
             move.flip()
